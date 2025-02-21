@@ -1,7 +1,11 @@
+from flask import Flask
+from threading import Thread
 from playwright.sync_api import sync_playwright
 import re
 import os
 import subprocess
+
+app = Flask(__name__)
 
 def obtener_m3u8():
     with sync_playwright() as p:
@@ -64,8 +68,15 @@ def subir_a_github():
     except Exception as e:
         print(f"Error al subir a GitHub: {e}")
 
-if __name__ == "__main__":
+@app.route('/')
+def ejecutar():
     print("Ejecutando el script...")
     obtener_m3u8()
     subir_a_github()
     print("Ejecución completada.")
+    return "Script ejecutado con éxito"
+
+if __name__ == "__main__":
+    print("Iniciando servidor Flask...")
+    port = int(os.environ.get("PORT", 5000))
+    Thread(target=lambda: app.run(host='0.0.0.0', port=port)).start()

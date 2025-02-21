@@ -1,9 +1,12 @@
 from playwright.sync_api import sync_playwright
 import re
+import os
+import subprocess
 
 def obtener_m3u8():
     with sync_playwright() as p:
         # Iniciar el navegador en modo headless
+        print("Iniciando navegador...")
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         
@@ -20,12 +23,15 @@ def obtener_m3u8():
 
         # Navegar a la URL objetivo
         url = "https://streamdz4.lat/player/embed.php?channel=espn"
+        print(f"Navegando a: {url}")
         page.goto(url)
         
         # Esperar 10 segundos para cargar completamente la página
+        print("Esperando a que cargue el contenido...")
         page.wait_for_timeout(10000)
         
         # Cerrar el navegador
+        print("Cerrando navegador...")
         browser.close()
 
         # Procesar las URLs m3u8 encontradas
@@ -46,5 +52,20 @@ def obtener_m3u8():
         else:
             print("No se encontraron URLs m3u8.")
 
+def subir_a_github():
+    try:
+        print("Subiendo output.txt a GitHub...")
+        subprocess.run(["git", "config", "--global", "user.name", "Render Bot"])
+        subprocess.run(["git", "config", "--global", "user.email", "bot@render.com"])
+        subprocess.run(["git", "add", "output.txt"])
+        subprocess.run(["git", "commit", "-m", "Actualización automática de output.txt"])
+        subprocess.run(["git", "push"])
+        print("Archivo subido exitosamente a GitHub.")
+    except Exception as e:
+        print(f"Error al subir a GitHub: {e}")
+
 if __name__ == "__main__":
+    print("Ejecutando el script...")
     obtener_m3u8()
+    subir_a_github()
+    print("Ejecución completada.")
